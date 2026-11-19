@@ -1,0 +1,2028 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>WILDCARD — Software, defined by design</title>
+    <meta
+      name="description"
+      content="Wildcard is a software studio. Expect the unexpected. Ship it anyway."
+    />
+    <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+    <link rel="icon" href="favicon.ico" sizes="any" />
+    <link rel="apple-touch-icon" href="apple-touch-icon.png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Anton&family=JetBrains+Mono:wght@400;500;700&display=swap"
+    />
+    <style>
+      :root {
+        --red: #cc0000;
+        --paper: #fafafa;
+        --ink: #141414;
+        --pad: clamp(20px, 4vw, 56px);
+        --display: "Anton", "Bebas Neue", "Impact", "Arial Narrow", sans-serif;
+        --mono: "JetBrains Mono", "SFMono-Regular", Consolas, monospace;
+      }
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      html {
+        scroll-behavior: smooth;
+      }
+      body {
+        background: var(--paper);
+        color: var(--red);
+        font-family: var(--mono);
+        font-size: 16px;
+        line-height: 1.5;
+        overflow-x: hidden;
+      }
+      a {
+        color: inherit;
+      }
+      .display {
+        font-family: var(--display);
+        text-transform: uppercase;
+        font-weight: 400;
+        letter-spacing: 0.005em;
+      }
+      .ast {
+        width: 1em;
+        height: 1em;
+        display: inline-block;
+        vertical-align: middle;
+        fill: none;
+        stroke: currentColor;
+        stroke-width: 22;
+      }
+
+      /* NAV */
+      nav {
+        position: fixed;
+        inset: 0 0 auto 0;
+        z-index: 10;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 18px var(--pad);
+        mix-blend-mode: normal;
+        background: rgba(250, 250, 250, 0.92);
+        backdrop-filter: blur(6px);
+        border-bottom: 2px solid var(--red);
+      }
+      nav .logo {
+        font-family: var(--display);
+        font-size: 28px;
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        letter-spacing: 0.02em;
+      }
+      nav ul {
+        display: flex;
+        gap: 28px;
+        list-style: none;
+        font-size: 13px;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        font-weight: 500;
+      }
+      nav ul a {
+        text-decoration: none;
+        position: relative;
+      }
+      nav ul a::after {
+        content: "";
+        position: absolute;
+        left: 0;
+        bottom: -4px;
+        height: 2px;
+        width: 0;
+        background: var(--red);
+        transition: width 0.25s;
+      }
+      nav ul a:hover::after {
+        width: 100%;
+      }
+
+      /* HERO */
+      .hero {
+        position: relative;
+        min-height: 100svh;
+        padding: 110px var(--pad) var(--pad);
+        display: grid;
+        grid-template-rows: auto 1fr auto;
+        border-bottom: 2px solid var(--red);
+      }
+      .corner {
+        font-size: clamp(14px, 1.6vw, 22px);
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+      .hero-mid {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        position: relative;
+      }
+      .wordmark {
+        font-family: var(--display);
+        text-transform: uppercase;
+        font-size: clamp(84px, 25.5vw, 520px);
+        line-height: 0.82;
+        color: var(--red);
+        letter-spacing: -0.005em;
+        margin-left: -0.02em;
+        user-select: none;
+        position: relative;
+        z-index: 1;
+      }
+      .tag {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px 28px;
+        justify-content: space-between;
+        align-items: flex-end;
+        margin-top: clamp(18px, 3vw, 36px);
+      }
+      .tag p.display {
+        font-size: clamp(24px, 4vw, 56px);
+        line-height: 1;
+        max-width: 14ch;
+        color: var(--ink);
+      }
+      .tag p.display em {
+        font-style: normal;
+        color: var(--red);
+      }
+      .tag .meta {
+        font-size: 13px;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        max-width: 30ch;
+        text-align: right;
+      }
+      .spin {
+        position: absolute;
+        z-index: 3;
+        pointer-events: none;
+        right: calc(var(--pad) * 0.4);
+        top: 4%;
+        width: clamp(70px, 13vw, 190px);
+        height: auto;
+        animation: spin 18s linear infinite;
+      }
+      .spin line {
+        stroke: var(--ink);
+        stroke-width: 34;
+        stroke-linecap: butt;
+      }
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+
+      /* MARQUEE */
+      .marquee {
+        background: var(--red);
+        color: var(--paper);
+        overflow: hidden;
+        border-bottom: 2px solid var(--red);
+        white-space: nowrap;
+      }
+      .marquee .track {
+        display: inline-flex;
+        animation: slide 26s linear infinite;
+        padding: 14px 0;
+      }
+      .marquee span {
+        font-family: var(--display);
+        font-size: clamp(28px, 4vw, 52px);
+        text-transform: uppercase;
+        padding: 0 22px;
+        display: inline-flex;
+        align-items: center;
+        gap: 44px;
+      }
+      @keyframes slide {
+        to {
+          transform: translateX(-50%);
+        }
+      }
+
+      /* SECTIONS */
+      section {
+        padding: clamp(64px, 10vw, 140px) var(--pad);
+      }
+      .label {
+        font-size: 13px;
+        letter-spacing: 0.2em;
+        text-transform: uppercase;
+        margin-bottom: 22px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-weight: 700;
+      }
+      h2 {
+        font-family: var(--display);
+        text-transform: uppercase;
+        font-weight: 400;
+        font-size: clamp(56px, 11vw, 190px);
+        line-height: 0.88;
+        color: var(--red);
+      }
+      h2 .out {
+        color: transparent;
+        -webkit-text-stroke: 2px var(--red);
+      }
+
+      /* SERVICES */
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        margin-top: clamp(36px, 6vw, 80px);
+        border: 2px solid var(--red);
+      }
+      .card {
+        padding: 28px 24px 32px;
+        min-height: 340px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        border-right: 2px solid var(--red);
+        transition:
+          background 0.25s,
+          color 0.25s;
+        cursor: default;
+      }
+      .card:last-child {
+        border-right: 0;
+      }
+      .card:hover {
+        background: var(--red);
+        color: var(--paper);
+      }
+      .card .no {
+        font-size: 13px;
+        letter-spacing: 0.18em;
+        font-weight: 700;
+      }
+      .card h3 {
+        font-family: var(--display);
+        text-transform: uppercase;
+        font-weight: 400;
+        font-size: clamp(34px, 3.6vw, 56px);
+        line-height: 0.95;
+        margin: 36px 0 14px;
+      }
+      .card p {
+        font-size: 14px;
+        color: var(--ink);
+        transition: color 0.25s;
+      }
+      .card:hover p {
+        color: var(--paper);
+      }
+      .card .stack {
+        font-size: 12px;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        margin-top: 22px;
+        font-weight: 500;
+      }
+
+      /* MANIFESTO */
+      .manifesto {
+        background: var(--ink);
+        color: var(--paper);
+      }
+      .manifesto h2 {
+        color: var(--paper);
+      }
+      .manifesto h2 .red {
+        color: var(--red);
+      }
+      .rules {
+        margin-top: clamp(36px, 6vw, 80px);
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 0;
+        border-top: 2px solid var(--paper);
+      }
+      .rule {
+        padding: 26px 24px 10px 0;
+      }
+      .rule b {
+        font-family: var(--display);
+        font-weight: 400;
+        font-size: clamp(28px, 3vw, 44px);
+        text-transform: uppercase;
+        display: block;
+        color: var(--red);
+        line-height: 1;
+      }
+      .rule p {
+        margin-top: 12px;
+        font-size: 14px;
+        max-width: 32ch;
+      }
+
+      /* PROCESS */
+      .steps {
+        margin-top: clamp(36px, 6vw, 80px);
+        border-top: 2px solid var(--red);
+      }
+      .step {
+        display: grid;
+        grid-template-columns: 90px 1fr 1.2fr;
+        gap: 20px;
+        align-items: baseline;
+        padding: 22px 0;
+        border-bottom: 2px solid var(--red);
+        transition: padding-left 0.25s;
+      }
+      .step:hover {
+        padding-left: 18px;
+      }
+      .step .n {
+        font-size: 14px;
+        font-weight: 700;
+        letter-spacing: 0.14em;
+      }
+      .step h3 {
+        font-family: var(--display);
+        font-weight: 400;
+        text-transform: uppercase;
+        font-size: clamp(32px, 5vw, 76px);
+        line-height: 1;
+      }
+      .step p {
+        font-size: 14px;
+        color: var(--ink);
+        max-width: 46ch;
+      }
+
+      /* PROJECTS */
+      .pf input {
+        position: absolute;
+        opacity: 0;
+        pointer-events: none;
+      }
+      .ptabs {
+        margin-top: clamp(36px, 6vw, 80px);
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+      }
+      .ptabs label {
+        font-size: 12px;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        font-weight: 700;
+        padding: 10px 16px;
+        border: 2px solid var(--red);
+        cursor: pointer;
+        transition:
+          background 0.2s,
+          color 0.2s;
+      }
+      .ptabs label sup {
+        font-size: 10px;
+        margin-left: 2px;
+        opacity: 0.8;
+      }
+      .ptabs label:hover {
+        background: var(--red);
+        color: var(--paper);
+      }
+      #f-all:checked ~ .ptabs label[for="f-all"],
+      #f-ai:checked ~ .ptabs label[for="f-ai"],
+      #f-prod:checked ~ .ptabs label[for="f-prod"],
+      #f-shop:checked ~ .ptabs label[for="f-shop"],
+      #f-tools:checked ~ .ptabs label[for="f-tools"],
+      #f-biz:checked ~ .ptabs label[for="f-biz"],
+      #f-games:checked ~ .ptabs label[for="f-games"] {
+        background: var(--red);
+        color: var(--paper);
+      }
+      .pf input:focus-visible ~ .ptabs label {
+        outline: 0;
+      }
+      #f-all:focus-visible ~ .ptabs label[for="f-all"],
+      #f-ai:focus-visible ~ .ptabs label[for="f-ai"],
+      #f-prod:focus-visible ~ .ptabs label[for="f-prod"],
+      #f-shop:focus-visible ~ .ptabs label[for="f-shop"],
+      #f-tools:focus-visible ~ .ptabs label[for="f-tools"],
+      #f-biz:focus-visible ~ .ptabs label[for="f-biz"],
+      #f-games:focus-visible ~ .ptabs label[for="f-games"] {
+        outline: 3px solid var(--ink);
+        outline-offset: 3px;
+      }
+      #f-ai:checked ~ .pgrid .pcard:not([data-cat="ai"]),
+      #f-prod:checked ~ .pgrid .pcard:not([data-cat="prod"]),
+      #f-shop:checked ~ .pgrid .pcard:not([data-cat="shop"]),
+      #f-tools:checked ~ .pgrid .pcard:not([data-cat="tools"]),
+      #f-biz:checked ~ .pgrid .pcard:not([data-cat="biz"]),
+      #f-games:checked ~ .pgrid .pcard:not([data-cat="games"]) {
+        display: none;
+      }
+      .pgrid {
+        margin-top: 24px;
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(min(100%, 340px), 1fr));
+        gap: 20px;
+      }
+      .pcard {
+        border: 2px solid var(--red);
+        display: flex;
+        flex-direction: column;
+        transition:
+          background 0.25s,
+          color 0.25s;
+      }
+      .pcard:hover {
+        background: var(--red);
+        color: var(--paper);
+      }
+      .thumb {
+        position: relative;
+        display: block;
+        aspect-ratio: 16/10;
+        overflow: hidden;
+        background: var(--red);
+        border-bottom: 2px solid var(--red);
+        color: inherit;
+      }
+      .thumb img {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        object-position: top;
+        display: block;
+        filter: grayscale(1) contrast(1.08);
+        transition:
+          filter 0.3s,
+          transform 0.5s;
+      }
+      .pcard:hover .thumb img {
+        filter: none;
+        transform: scale(1.04);
+      }
+      .thumb .ph {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 14px;
+        background: var(--red);
+        color: var(--paper);
+        transition:
+          background 0.25s,
+          color 0.25s;
+      }
+      .thumb .ph b {
+        font-family: var(--display);
+        font-weight: 400;
+        font-size: clamp(90px, 12vw, 150px);
+        line-height: 1;
+        text-transform: uppercase;
+      }
+      .pcard:hover .thumb .ph {
+        background: var(--ink);
+      }
+      .thumb .no {
+        z-index: 2;
+        position: absolute;
+        left: 12px;
+        top: 12px;
+        font-size: 12px;
+        font-weight: 700;
+        letter-spacing: 0.14em;
+        background: var(--paper);
+        color: var(--red);
+        padding: 3px 8px;
+      }
+      .thumb .fb {
+        z-index: 2;
+        position: absolute;
+        right: 12px;
+        top: 12px;
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        background: var(--ink);
+        color: var(--paper);
+        padding: 4px 10px;
+      }
+      .pcard .body {
+        padding: 22px 22px 24px;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        flex: 1;
+      }
+      .pcard .cat {
+        font-size: 11px;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        font-weight: 700;
+      }
+      .pcard h3 {
+        font-family: var(--display);
+        font-weight: 400;
+        text-transform: uppercase;
+        font-size: clamp(36px, 3.4vw, 52px);
+        line-height: 0.95;
+      }
+      .pcard p {
+        font-size: 14px;
+        color: var(--ink);
+        transition: color 0.25s;
+      }
+      .pcard:hover p {
+        color: var(--paper);
+      }
+      .chips {
+        list-style: none;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        margin-top: auto;
+        padding-top: 6px;
+      }
+      .chips li {
+        font-size: 11px;
+        letter-spacing: 0.06em;
+        font-weight: 500;
+        padding: 3px 9px;
+        border: 1.5px solid currentColor;
+      }
+      .pcard .live {
+        align-self: flex-start;
+        margin-top: 8px;
+        font-family: var(--display);
+        font-size: 24px;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        text-decoration: none;
+        border-bottom: 2px solid currentColor;
+      }
+      .pcard .live:hover {
+        background: var(--paper);
+        color: var(--red);
+      }
+
+      /* CLIENTS */
+      .clients {
+        background: var(--ink);
+        color: var(--paper);
+      }
+      .clients h2 {
+        color: var(--paper);
+      }
+      .clients h2 .red {
+        color: var(--red);
+      }
+      .cgrid {
+        margin-top: clamp(36px, 6vw, 80px);
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 20px;
+      }
+      .client {
+        border: 2px solid var(--paper);
+        padding: 26px 24px 28px;
+        display: flex;
+        flex-direction: column;
+        gap: 22px;
+        transition:
+          background 0.25s,
+          border-color 0.25s;
+      }
+      .client:hover {
+        background: var(--red);
+        border-color: var(--red);
+      }
+      .client .top {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+      }
+      .client .badge {
+        width: 64px;
+        height: 64px;
+        border-radius: 50%;
+        background: var(--red);
+        color: var(--paper);
+        display: grid;
+        place-items: center;
+        flex: none;
+        transition:
+          background 0.25s,
+          color 0.25s;
+      }
+      .client:hover .badge {
+        background: var(--paper);
+        color: var(--red);
+      }
+      .client h3 {
+        font-family: var(--display);
+        font-weight: 400;
+        text-transform: uppercase;
+        font-size: clamp(28px, 2.8vw, 40px);
+        line-height: 1;
+      }
+      .client .ind {
+        font-size: 12px;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: var(--red);
+        font-weight: 700;
+        margin-top: 4px;
+        transition: color 0.25s;
+      }
+      .client:hover .ind {
+        color: var(--paper);
+      }
+      .client dl {
+        display: grid;
+        grid-template-columns: auto 1fr;
+        gap: 10px 18px;
+        font-size: 13px;
+        border-top: 1px solid rgba(250, 250, 250, 0.35);
+        padding-top: 18px;
+      }
+      .client dt {
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        font-weight: 700;
+        color: var(--red);
+        font-size: 11px;
+        padding-top: 2px;
+        transition: color 0.25s;
+      }
+      .client:hover dt {
+        color: var(--paper);
+      }
+      .client dd {
+        color: var(--paper);
+      }
+
+      /* VOICES */
+      .quotes {
+        margin-top: clamp(36px, 6vw, 80px);
+        display: grid;
+        grid-template-columns: 1.6fr 1fr;
+        grid-template-rows: auto auto;
+        gap: 20px;
+      }
+      .q {
+        border: 2px solid var(--red);
+        padding: clamp(24px, 3vw, 44px);
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        gap: 28px;
+        transition:
+          background 0.25s,
+          color 0.25s;
+      }
+      .q:hover {
+        background: var(--red);
+        color: var(--paper);
+      }
+      .q.big {
+        grid-row: span 2;
+        background: var(--red);
+        color: var(--paper);
+      }
+      .q.big:hover {
+        background: var(--paper);
+        color: var(--red);
+      }
+      .q .mark {
+        width: clamp(48px, 6vw, 84px);
+        height: clamp(48px, 6vw, 84px);
+      }
+      .q blockquote {
+        font-family: var(--display);
+        text-transform: uppercase;
+        font-size: clamp(26px, 2.6vw, 40px);
+        line-height: 1.05;
+        color: inherit;
+      }
+      .q.big blockquote {
+        font-size: clamp(36px, 5vw, 80px);
+        line-height: 0.98;
+      }
+      .q figcaption {
+        font-size: 13px;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+      .q figcaption span {
+        font-weight: 400;
+        opacity: 0.85;
+      }
+      .q .line {
+        width: 36px;
+        height: 3px;
+        background: currentColor;
+        flex: none;
+      }
+      .note {
+        margin-top: 20px;
+        font-size: 12px;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--ink);
+        opacity: 0.7;
+      }
+
+      @media (max-width: 900px) {
+        .cgrid {
+          grid-template-columns: 1fr;
+        }
+        .quotes {
+          grid-template-columns: 1fr;
+        }
+        .q.big {
+          grid-row: auto;
+        }
+      }
+
+      /* CONTACT */
+      .contact {
+        background: var(--red);
+        color: var(--paper);
+        position: relative;
+        overflow: hidden;
+        min-height: 90vh;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+      }
+      .contact h2 {
+        color: var(--paper);
+        font-size: clamp(70px, 17vw, 300px);
+      }
+      .contact .big-ast {
+        position: absolute;
+        right: -6vw;
+        bottom: -8vw;
+        width: clamp(260px, 42vw, 640px);
+        opacity: 0.14;
+      }
+      .contact .big-ast line {
+        stroke: var(--paper);
+        stroke-width: 34;
+      }
+      .contact .details {
+        margin-top: 48px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 20px 60px;
+        font-weight: 700;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        font-size: clamp(14px, 1.5vw, 20px);
+        position: relative;
+      }
+      .contact .details a {
+        text-decoration: none;
+        border-bottom: 2px solid var(--paper);
+      }
+      .contact .details a:hover {
+        background: var(--paper);
+        color: var(--red);
+      }
+      .btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 12px;
+        margin-top: 36px;
+        background: var(--paper);
+        color: var(--red);
+        font-family: var(--display);
+        font-size: clamp(26px, 3vw, 42px);
+        text-transform: uppercase;
+        text-decoration: none;
+        padding: 14px 30px;
+        border: 2px solid var(--paper);
+        position: relative;
+        transition:
+          background 0.2s,
+          color 0.2s;
+      }
+      .btn:hover {
+        background: transparent;
+        color: var(--paper);
+      }
+      footer {
+        display: flex;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 12px;
+        padding: 18px var(--pad);
+        font-size: 12px;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        border-top: 2px solid var(--red);
+        background: var(--paper);
+      }
+
+      a:focus-visible,
+      .btn:focus-visible {
+        outline: 3px solid var(--ink);
+        outline-offset: 4px;
+      }
+
+      @media (max-width: 900px) {
+        nav ul {
+          display: none;
+        }
+        .grid {
+          grid-template-columns: 1fr 1fr;
+        }
+        .card:nth-child(2) {
+          border-right: 0;
+        }
+        .card:nth-child(-n + 2) {
+          border-bottom: 2px solid var(--red);
+        }
+        .card:nth-child(3) {
+          border-right: 2px solid var(--red);
+        }
+        .rules {
+          grid-template-columns: 1fr;
+        }
+        .step {
+          grid-template-columns: 50px 1fr;
+        }
+        .step p {
+          grid-column: 2;
+        }
+        .tag .meta {
+          text-align: left;
+        }
+      }
+      @media (max-width: 520px) {
+        .grid {
+          grid-template-columns: 1fr;
+        }
+        .card {
+          border-right: 0 !important;
+          border-bottom: 2px solid var(--red);
+        }
+        .card:last-child {
+          border-bottom: 0;
+        }
+        .card {
+          min-height: 260px;
+        }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .spin,
+        .marquee .track {
+          animation: none;
+        }
+        html {
+          scroll-behavior: auto;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <svg width="0" height="0" style="position: absolute" aria-hidden="true">
+      <symbol id="ast" viewBox="-130 -130 260 260">
+        <g
+          stroke="currentColor"
+          stroke-width="40"
+          stroke-linecap="butt"
+          fill="none"
+        >
+          <line x1="0" y1="-120" x2="0" y2="120" />
+          <line x1="-104" y1="-60" x2="104" y2="60" />
+          <line x1="-104" y1="60" x2="104" y2="-60" />
+        </g>
+      </symbol>
+    </svg>
+
+    <nav>
+      <a class="logo" href="#top" aria-label="Wildcard home">
+        <svg width="26" height="26" aria-hidden="true"><use href="#ast" /></svg
+        >WILDCARD
+      </a>
+      <ul>
+        <li><a href="#services">Services</a></li>
+        <li><a href="#projects">Projects</a></li>
+        <li><a href="#clients">Clients</a></li>
+        <li><a href="#voices">Voices</a></li>
+        <li><a href="#manifesto">Manifesto</a></li>
+        <li><a href="#process">Process</a></li>
+        <li><a href="#contact">Contact</a></li>
+      </ul>
+    </nav>
+
+    <header class="hero" id="top">
+      <div class="corner">
+        <span>Made</span
+        ><svg width="34" height="34" aria-hidden="true"><use href="#ast" /></svg
+        ><span>To</span>
+      </div>
+
+      <div class="hero-mid">
+        <svg class="spin" viewBox="-130 -130 260 260" aria-hidden="true">
+          <line x1="0" y1="-120" x2="0" y2="120" />
+          <line x1="-104" y1="-60" x2="104" y2="60" />
+          <line x1="-104" y1="60" x2="104" y2="-60" />
+        </svg>
+        <h1 class="wordmark">Wildcard</h1>
+        <div class="tag">
+          <p class="display">Expect the <em>unexpected.</em> Ship it anyway.</p>
+          <p class="meta">
+            Software studio. Backend, frontend and AI, built end to end.
+          </p>
+        </div>
+      </div>
+
+      <div class="corner">
+        <span>Stand</span
+        ><svg width="34" height="34" aria-hidden="true"><use href="#ast" /></svg
+        ><span>Out</span>
+      </div>
+    </header>
+
+    <div class="marquee" aria-hidden="true">
+      <div class="track">
+        <span
+          >Microservices
+          <svg width="34" height="34"><use href="#ast" /></svg> Full-stack
+          <svg width="34" height="34"><use href="#ast" /></svg> AI &amp; RAG
+          <svg width="34" height="34"><use href="#ast" /></svg> Cloud
+          <svg width="34" height="34"><use href="#ast" /></svg
+        ></span>
+        <span
+          >Microservices
+          <svg width="34" height="34"><use href="#ast" /></svg> Full-stack
+          <svg width="34" height="34"><use href="#ast" /></svg> AI &amp; RAG
+          <svg width="34" height="34"><use href="#ast" /></svg> Cloud
+          <svg width="34" height="34"><use href="#ast" /></svg
+        ></span>
+        <span
+          >Microservices
+          <svg width="34" height="34"><use href="#ast" /></svg> Full-stack
+          <svg width="34" height="34"><use href="#ast" /></svg> AI &amp; RAG
+          <svg width="34" height="34"><use href="#ast" /></svg> Cloud
+          <svg width="34" height="34"><use href="#ast" /></svg
+        ></span>
+        <span
+          >Microservices
+          <svg width="34" height="34"><use href="#ast" /></svg> Full-stack
+          <svg width="34" height="34"><use href="#ast" /></svg> AI &amp; RAG
+          <svg width="34" height="34"><use href="#ast" /></svg> Cloud
+          <svg width="34" height="34"><use href="#ast" /></svg
+        ></span>
+      </div>
+    </div>
+
+    <section id="services">
+      <div class="label">
+        <svg width="18" height="18" aria-hidden="true"><use href="#ast" /></svg
+        >What we build
+      </div>
+      <h2>One symbol.<br /><span class="out">Any</span> system.</h2>
+
+      <div class="grid">
+        <article class="card">
+          <div>
+            <span class="no">01</span>
+            <h3>Backend &amp; Microservices</h3>
+            <p>Resilient services that scale and keep talking to each other.</p>
+          </div>
+          <div class="stack">Java · Spring Boot · Kafka · Redis</div>
+        </article>
+        <article class="card">
+          <div>
+            <span class="no">02</span>
+            <h3>Web Apps</h3>
+            <p>Fast, bold interfaces that people remember.</p>
+          </div>
+          <div class="stack">React · Next.js · Node.js</div>
+        </article>
+        <article class="card">
+          <div>
+            <span class="no">03</span>
+            <h3>AI Products</h3>
+            <p>RAG pipelines and LLM features wired into real products.</p>
+          </div>
+          <div class="stack">LangChain · LangGraph · Ollama</div>
+        </article>
+        <article class="card">
+          <div>
+            <span class="no">04</span>
+            <h3>Cloud &amp; DevOps</h3>
+            <p>Containerised, deployed and ready to run in production.</p>
+          </div>
+          <div class="stack">Docker · Kubernetes · AWS</div>
+        </article>
+      </div>
+    </section>
+
+    <section id="projects">
+      <div class="label">
+        <svg width="18" height="18" aria-hidden="true"><use href="#ast" /></svg
+        >Selected work
+      </div>
+      <h2>Built.<br /><span class="out">Shipped.</span></h2>
+
+      <div class="pf">
+        <input type="radio" name="pf" id="f-all" checked /><input
+          type="radio"
+          name="pf"
+          id="f-ai"
+        /><input type="radio" name="pf" id="f-prod" /><input
+          type="radio"
+          name="pf"
+          id="f-shop"
+        /><input type="radio" name="pf" id="f-tools" /><input
+          type="radio"
+          name="pf"
+          id="f-biz"
+        /><input type="radio" name="pf" id="f-games" />
+        <div class="ptabs" role="group" aria-label="Filter projects">
+          <label for="f-all">All <sup>25</sup></label
+          ><label for="f-ai">AI Solutions <sup>2</sup></label
+          ><label for="f-prod">Productivity &amp; Trackers <sup>8</sup></label
+          ><label for="f-shop">eCommerce <sup>3</sup></label
+          ><label for="f-tools">Tools &amp; Utilities <sup>4</sup></label
+          ><label for="f-biz">Business &amp; Portfolio Sites <sup>3</sup></label
+          ><label for="f-games">Mini Games <sup>5</sup></label>
+        </div>
+        <div class="pgrid">
+          <article class="pcard" data-cat="ai">
+            <a
+              class="thumb"
+              href="https://askdb-leo-app.vercel.app"
+              target="_blank"
+              rel="noopener"
+              aria-label="Open AskDB live"
+              ><span class="ph" aria-hidden="true"
+                ><b>As</b
+                ><svg width="38" height="38"><use href="#ast" /></svg></span
+              ><img
+                src="images/askdb.png"
+                alt="AskDB website screenshot"
+                loading="lazy"
+                onerror="this.remove()"
+              /><span class="no">01</span></a
+            >
+            <div class="body">
+              <div class="cat">AI Solutions</div>
+              <h3>AskDB</h3>
+              <p>
+                An AI agent that turns plain-English questions into database
+                queries — ask naturally, get your data back instantly, no SQL
+                required.
+              </p>
+              <ul class="chips">
+                <li>Python</li>
+                <li>NL-to-SQL</li>
+                <li>LangChain</li>
+                <li>React.js</li>
+              </ul>
+              <a
+                class="live"
+                href="https://askdb-leo-app.vercel.app"
+                target="_blank"
+                rel="noopener"
+                >View live <span aria-hidden="true">&#8599;</span></a
+              >
+            </div>
+          </article>
+          <article class="pcard" data-cat="prod">
+            <a
+              class="thumb"
+              href="https://ascend-leo-app.vercel.app"
+              target="_blank"
+              rel="noopener"
+              aria-label="Open Ascend live"
+              ><span class="ph" aria-hidden="true"
+                ><b>As</b
+                ><svg width="38" height="38"><use href="#ast" /></svg></span
+              ><img
+                src="images/ascend.png"
+                alt="Ascend website screenshot"
+                loading="lazy"
+                onerror="this.remove()"
+              /><span class="no">03</span></a
+            >
+            <div class="body">
+              <div class="cat">Productivity &amp; Trackers</div>
+              <h3>Ascend</h3>
+              <p>
+                A goal-tracking app that helps you break big ambitions into
+                daily, trackable progress — built for people who want structure
+                without losing motivation.
+              </p>
+              <ul class="chips">
+                <li>React.js</li>
+                <li>Node.js</li>
+                <li>REST APIs</li>
+                <li>JavaScript</li>
+              </ul>
+              <a
+                class="live"
+                href="https://ascend-leo-app.vercel.app"
+                target="_blank"
+                rel="noopener"
+                >View live <span aria-hidden="true">&#8599;</span></a
+              >
+            </div>
+          </article>
+          <article class="pcard" data-cat="prod">
+            <a
+              class="thumb"
+              href="https://inkwell-leo-app.vercel.app"
+              target="_blank"
+              rel="noopener"
+              aria-label="Open Inkwell live"
+              ><span class="ph" aria-hidden="true"
+                ><b>In</b
+                ><svg width="38" height="38"><use href="#ast" /></svg></span
+              ><img
+                src="images/inkwell.png"
+                alt="Inkwell website screenshot"
+                loading="lazy"
+                onerror="this.remove()"
+              /><span class="no">04</span></a
+            >
+            <div class="body">
+              <div class="cat">Productivity &amp; Trackers</div>
+              <h3>Inkwell</h3>
+              <p>
+                A calm, distraction-free daily journal for capturing thoughts,
+                moods, and moments — one entry at a time.
+              </p>
+              <ul class="chips">
+                <li>Spring Boot</li>
+                <li>Java</li>
+                <li>MySQL</li>
+                <li>HTML</li>
+                <li>CSS</li>
+              </ul>
+              <a
+                class="live"
+                href="https://inkwell-leo-app.vercel.app"
+                target="_blank"
+                rel="noopener"
+                >View live <span aria-hidden="true">&#8599;</span></a
+              >
+            </div>
+          </article>
+          <article class="pcard feat" data-cat="prod">
+            <a
+              class="thumb"
+              href="https://repwise-leo-app.vercel.app"
+              target="_blank"
+              rel="noopener"
+              aria-label="Open RepWise live"
+              ><span class="ph" aria-hidden="true"
+                ><b>Re</b
+                ><svg width="38" height="38"><use href="#ast" /></svg></span
+              ><img
+                src="images/repwise.png"
+                alt="RepWise website screenshot"
+                loading="lazy"
+                onerror="this.remove()"
+              /><span class="no">05</span><span class="fb">Featured</span></a
+            >
+            <div class="body">
+              <div class="cat">Productivity &amp; Trackers</div>
+              <h3>RepWise</h3>
+              <p>
+                A workout tracker built for consistency — log sessions, track
+                progress, and stay accountable to your training routine.
+              </p>
+              <ul class="chips">
+                <li>Spring Boot</li>
+                <li>Java</li>
+                <li>React.js</li>
+                <li>REST APIs</li>
+              </ul>
+              <a
+                class="live"
+                href="https://repwise-leo-app.vercel.app"
+                target="_blank"
+                rel="noopener"
+                >View live <span aria-hidden="true">&#8599;</span></a
+              >
+            </div>
+          </article>
+          <article class="pcard" data-cat="prod">
+            <a
+              class="thumb"
+              href="https://dayflow-leo-app.vercel.app"
+              target="_blank"
+              rel="noopener"
+              aria-label="Open DayFlow live"
+              ><span class="ph" aria-hidden="true"
+                ><b>Da</b
+                ><svg width="38" height="38"><use href="#ast" /></svg></span
+              ><img
+                src="images/dayflow.png"
+                alt="DayFlow website screenshot"
+                loading="lazy"
+                onerror="this.remove()"
+              /><span class="no">06</span></a
+            >
+            <div class="body">
+              <div class="cat">Productivity &amp; Trackers</div>
+              <h3>DayFlow</h3>
+              <p>
+                An all-in-one productivity space combining to-dos, notes, and
+                daily tracking in one clean, focused interface.
+              </p>
+              <ul class="chips">
+                <li>Node.js</li>
+                <li>React.js</li>
+                <li>REST APIs</li>
+                <li>JavaScript</li>
+              </ul>
+              <a
+                class="live"
+                href="https://dayflow-leo-app.vercel.app"
+                target="_blank"
+                rel="noopener"
+                >View live <span aria-hidden="true">&#8599;</span></a
+              >
+            </div>
+          </article>
+          <article class="pcard" data-cat="prod">
+            <a
+              class="thumb"
+              href="https://ledger-leo-app.vercel.app"
+              target="_blank"
+              rel="noopener"
+              aria-label="Open Ledger live"
+              ><span class="ph" aria-hidden="true"
+                ><b>Le</b
+                ><svg width="38" height="38"><use href="#ast" /></svg></span
+              ><img
+                src="images/ledger.png"
+                alt="Ledger website screenshot"
+                loading="lazy"
+                onerror="this.remove()"
+              /><span class="no">07</span></a
+            >
+            <div class="body">
+              <div class="cat">Productivity &amp; Trackers</div>
+              <h3>Ledger</h3>
+              <p>
+                A straightforward expense tracker that makes it easy to log
+                spending, spot patterns, and stay on top of a budget.
+              </p>
+              <ul class="chips">
+                <li>Spring Boot</li>
+                <li>Java</li>
+                <li>HTML</li>
+                <li>CSS</li>
+                <li>MySQL</li>
+              </ul>
+              <a
+                class="live"
+                href="https://ledger-leo-app.vercel.app"
+                target="_blank"
+                rel="noopener"
+                >View live <span aria-hidden="true">&#8599;</span></a
+              >
+            </div>
+          </article>
+          <article class="pcard feat" data-cat="prod">
+            <a
+              class="thumb"
+              href="https://office-work-tracker-leo-app.vercel.app"
+              target="_blank"
+              rel="noopener"
+              aria-label="Open Office Work Tracker live"
+              ><span class="ph" aria-hidden="true"
+                ><b>Of</b
+                ><svg width="38" height="38"><use href="#ast" /></svg></span
+              ><img
+                src="images/office-work-tracker.png"
+                alt="Office Work Tracker website screenshot"
+                loading="lazy"
+                onerror="this.remove()"
+              /><span class="no">09</span><span class="fb">Featured</span></a
+            >
+            <div class="body">
+              <div class="cat">Productivity &amp; Trackers</div>
+              <h3>Office Work Tracker</h3>
+              <p>
+                A lightweight daily work tracker for logging tasks and hours —
+                simple enough to actually use every day.
+              </p>
+              <ul class="chips">
+                <li>JavaScript</li>
+                <li>HTML</li>
+                <li>CSS</li>
+              </ul>
+              <a
+                class="live"
+                href="https://office-work-tracker-leo-app.vercel.app"
+                target="_blank"
+                rel="noopener"
+                >View live <span aria-hidden="true">&#8599;</span></a
+              >
+            </div>
+          </article>
+          <article class="pcard feat" data-cat="prod">
+            <a
+              class="thumb"
+              href="https://focus-board-leo-app.vercel.app/"
+              target="_blank"
+              rel="noopener"
+              aria-label="Open Focus Board live"
+              ><span class="ph" aria-hidden="true"
+                ><b>Fo</b
+                ><svg width="38" height="38"><use href="#ast" /></svg></span
+              ><img
+                src="images/focus-board.png"
+                alt="Focus Board website screenshot"
+                loading="lazy"
+                onerror="this.remove()"
+              /><span class="no">10</span><span class="fb">Featured</span></a
+            >
+            <div class="body">
+              <div class="cat">Productivity &amp; Trackers</div>
+              <h3>Focus Board</h3>
+              <p>
+                A lightweight kanban board for study and interview prep, built
+                with plain HTML, CSS and JS, with light and dark themes and
+                automatic backup to a local JSON file.
+              </p>
+              <ul class="chips">
+                <li>JavaScript</li>
+                <li>HTML</li>
+                <li>CSS</li>
+              </ul>
+              <a
+                class="live"
+                href="https://focus-board-leo-app.vercel.app/"
+                target="_blank"
+                rel="noopener"
+                >View live <span aria-hidden="true">&#8599;</span></a
+              >
+            </div>
+          </article>
+          <article class="pcard feat" data-cat="shop">
+            <a
+              class="thumb"
+              href="https://luxelle-website.vercel.app"
+              target="_blank"
+              rel="noopener"
+              aria-label="Open Luxelle live"
+              ><span class="ph" aria-hidden="true"
+                ><b>Lu</b
+                ><svg width="38" height="38"><use href="#ast" /></svg></span
+              ><img
+                src="images/luxelle.jpg"
+                alt="Luxelle website screenshot"
+                loading="lazy"
+                onerror="this.remove()"
+              /><span class="no">11</span><span class="fb">Featured</span></a
+            >
+            <div class="body">
+              <div class="cat">eCommerce</div>
+              <h3>Luxelle</h3>
+              <p>
+                A luxury jewelry eCommerce experience built for elegance, speed,
+                and a seamless path from browsing to checkout.
+              </p>
+              <ul class="chips">
+                <li>Next.js</li>
+                <li>Spring Boot</li>
+                <li>Java</li>
+                <li>REST APIs</li>
+              </ul>
+              <a
+                class="live"
+                href="https://luxelle-website.vercel.app"
+                target="_blank"
+                rel="noopener"
+                >View live <span aria-hidden="true">&#8599;</span></a
+              >
+            </div>
+          </article>
+          <article class="pcard feat" data-cat="shop">
+            <a
+              class="thumb"
+              href="https://zestyza.vercel.app"
+              target="_blank"
+              rel="noopener"
+              aria-label="Open Zestyza live"
+              ><span class="ph" aria-hidden="true"
+                ><b>Ze</b
+                ><svg width="38" height="38"><use href="#ast" /></svg></span
+              ><img
+                src="images/zestyza.png"
+                alt="Zestyza website screenshot"
+                loading="lazy"
+                onerror="this.remove()"
+              /><span class="no">12</span><span class="fb">Featured</span></a
+            >
+            <div class="body">
+              <div class="cat">eCommerce</div>
+              <h3>Zestyza</h3>
+              <p>
+                A pizza ordering platform built for speed and simplicity —
+                browse the menu, customize an order, and check out in seconds.
+              </p>
+              <ul class="chips">
+                <li>Spring Boot</li>
+                <li>Java</li>
+                <li>React.js</li>
+                <li>MySQL</li>
+              </ul>
+              <a
+                class="live"
+                href="https://zestyza.vercel.app"
+                target="_blank"
+                rel="noopener"
+                >View live <span aria-hidden="true">&#8599;</span></a
+              >
+            </div>
+          </article>
+          <article class="pcard feat" data-cat="shop">
+            <a
+              class="thumb"
+              href="https://oakhaven-leo-app.vercel.app"
+              target="_blank"
+              rel="noopener"
+              aria-label="Open Oakhaven live"
+              ><span class="ph" aria-hidden="true"
+                ><b>Oa</b
+                ><svg width="38" height="38"><use href="#ast" /></svg></span
+              ><img
+                src="images/oakhaven.png"
+                alt="Oakhaven website screenshot"
+                loading="lazy"
+                onerror="this.remove()"
+              /><span class="no">13</span><span class="fb">Featured</span></a
+            >
+            <div class="body">
+              <div class="cat">eCommerce</div>
+              <h3>Oakhaven</h3>
+              <p>
+                A furniture eCommerce platform built on a complete microservices
+                architecture — designed to scale independently across catalog,
+                orders, and inventory.
+              </p>
+              <ul class="chips">
+                <li>Spring Boot</li>
+                <li>Microservices</li>
+                <li>Spring Cloud</li>
+                <li>React.js</li>
+                <li>Docker</li>
+              </ul>
+              <a
+                class="live"
+                href="https://oakhaven-leo-app.vercel.app"
+                target="_blank"
+                rel="noopener"
+                >View live <span aria-hidden="true">&#8599;</span></a
+              >
+            </div>
+          </article>
+          <article class="pcard feat" data-cat="tools">
+            <a
+              class="thumb"
+              href="https://notifications-leo-app.vercel.app"
+              target="_blank"
+              rel="noopener"
+              aria-label="Open Notify Hub live"
+              ><span class="ph" aria-hidden="true"
+                ><b>No</b
+                ><svg width="38" height="38"><use href="#ast" /></svg></span
+              ><img
+                src="images/notify-hub.png"
+                alt="Notify Hub website screenshot"
+                loading="lazy"
+                onerror="this.remove()"
+              /><span class="no">16</span><span class="fb">Featured</span></a
+            >
+            <div class="body">
+              <div class="cat">Tools &amp; Utilities</div>
+              <h3>Notify Hub</h3>
+              <p>
+                A centralized notification server that dispatches alerts across
+                email, WhatsApp, SMS, and device push — one system, every
+                channel.
+              </p>
+              <ul class="chips">
+                <li>Spring Boot</li>
+                <li>Java</li>
+                <li>HTML</li>
+                <li>REST APIs</li>
+              </ul>
+              <a
+                class="live"
+                href="https://notifications-leo-app.vercel.app"
+                target="_blank"
+                rel="noopener"
+                >View live <span aria-hidden="true">&#8599;</span></a
+              >
+            </div>
+          </article>
+          <article class="pcard" data-cat="tools">
+            <a
+              class="thumb"
+              href="https://hue-craft-leo-app.vercel.app"
+              target="_blank"
+              rel="noopener"
+              aria-label="Open HueCraft live"
+              ><span class="ph" aria-hidden="true"
+                ><b>Hu</b
+                ><svg width="38" height="38"><use href="#ast" /></svg></span
+              ><img
+                src="images/huecraft.png"
+                alt="HueCraft website screenshot"
+                loading="lazy"
+                onerror="this.remove()"
+              /><span class="no">17</span></a
+            >
+            <div class="body">
+              <div class="cat">Tools &amp; Utilities</div>
+              <h3>HueCraft</h3>
+              <p>
+                A simple, snappy color picker for grabbing the exact shade you
+                need — built for designers and developers alike.
+              </p>
+              <ul class="chips">
+                <li>JavaScript</li>
+                <li>HTML</li>
+                <li>CSS</li>
+              </ul>
+              <a
+                class="live"
+                href="https://hue-craft-leo-app.vercel.app"
+                target="_blank"
+                rel="noopener"
+                >View live <span aria-hidden="true">&#8599;</span></a
+              >
+            </div>
+          </article>
+          <article class="pcard feat" data-cat="biz">
+            <a
+              class="thumb"
+              href="https://photography-polio.vercel.app"
+              target="_blank"
+              rel="noopener"
+              aria-label="Open Photography Portfolio live"
+              ><span class="ph" aria-hidden="true"
+                ><b>Ph</b
+                ><svg width="38" height="38"><use href="#ast" /></svg></span
+              ><img
+                src="images/photography-portfolio.jpg"
+                alt="Photography Portfolio website screenshot"
+                loading="lazy"
+                onerror="this.remove()"
+              /><span class="no">18</span><span class="fb">Featured</span></a
+            >
+            <div class="body">
+              <div class="cat">Business &amp; Portfolio Sites</div>
+              <h3>Photography Portfolio</h3>
+              <p>
+                A minimalist photography portfolio that lets the images do the
+                talking — clean layout, fast load, full focus on the work.
+              </p>
+              <ul class="chips">
+                <li>React.js</li>
+                <li>JavaScript</li>
+              </ul>
+              <a
+                class="live"
+                href="https://photography-polio.vercel.app"
+                target="_blank"
+                rel="noopener"
+                >View live <span aria-hidden="true">&#8599;</span></a
+              >
+            </div>
+          </article>
+          <article class="pcard" data-cat="games">
+            <a
+              class="thumb"
+              href="https://sudoku-leo-app.vercel.app"
+              target="_blank"
+              rel="noopener"
+              aria-label="Open Sudoku live"
+              ><span class="ph" aria-hidden="true"
+                ><b>Su</b
+                ><svg width="38" height="38"><use href="#ast" /></svg></span
+              ><img
+                src="images/sudoku.png"
+                alt="Sudoku website screenshot"
+                loading="lazy"
+                onerror="this.remove()"
+              /><span class="no">21</span></a
+            >
+            <div class="body">
+              <div class="cat">Mini Games</div>
+              <h3>Sudoku</h3>
+              <p>
+                A clean, classic Sudoku built for the browser — pick a
+                difficulty and sharpen your focus.
+              </p>
+              <ul class="chips">
+                <li>JavaScript</li>
+                <li>HTML</li>
+                <li>CSS</li>
+              </ul>
+              <a
+                class="live"
+                href="https://sudoku-leo-app.vercel.app"
+                target="_blank"
+                rel="noopener"
+                >View live <span aria-hidden="true">&#8599;</span></a
+              >
+            </div>
+          </article>
+          <article class="pcard feat" data-cat="games">
+            <a
+              class="thumb"
+              href="https://chess-leo-app.vercel.app"
+              target="_blank"
+              rel="noopener"
+              aria-label="Open Chess live"
+              ><span class="ph" aria-hidden="true"
+                ><b>Ch</b
+                ><svg width="38" height="38"><use href="#ast" /></svg></span
+              ><img
+                src="images/chess.png"
+                alt="Chess website screenshot"
+                loading="lazy"
+                onerror="this.remove()"
+              /><span class="no">22</span><span class="fb">Featured</span></a
+            >
+            <div class="body">
+              <div class="cat">Mini Games</div>
+              <h3>Chess</h3>
+              <p>
+                A fully playable chess game built from scratch in JavaScript —
+                every rule, every move.
+              </p>
+              <ul class="chips">
+                <li>JavaScript</li>
+                <li>HTML</li>
+                <li>CSS</li>
+              </ul>
+              <a
+                class="live"
+                href="https://chess-leo-app.vercel.app"
+                target="_blank"
+                rel="noopener"
+                >View live <span aria-hidden="true">&#8599;</span></a
+              >
+            </div>
+          </article>
+          <article class="pcard feat" data-cat="games">
+            <a
+              class="thumb"
+              href="https://tetris-leo-app.vercel.app"
+              target="_blank"
+              rel="noopener"
+              aria-label="Open Tetris live"
+              ><span class="ph" aria-hidden="true"
+                ><b>Te</b
+                ><svg width="38" height="38"><use href="#ast" /></svg></span
+              ><img
+                src="images/tetris.png"
+                alt="Tetris website screenshot"
+                loading="lazy"
+                onerror="this.remove()"
+              /><span class="no">23</span><span class="fb">Featured</span></a
+            >
+            <div class="body">
+              <div class="cat">Mini Games</div>
+              <h3>Tetris</h3>
+              <p>
+                The timeless block-stacking classic, rebuilt for the browser
+                with smooth controls and increasing speed.
+              </p>
+              <ul class="chips">
+                <li>JavaScript</li>
+                <li>HTML</li>
+                <li>CSS</li>
+              </ul>
+              <a
+                class="live"
+                href="https://tetris-leo-app.vercel.app"
+                target="_blank"
+                rel="noopener"
+                >View live <span aria-hidden="true">&#8599;</span></a
+              >
+            </div>
+          </article>
+          <article class="pcard" data-cat="games">
+            <a
+              class="thumb"
+              href="https://snake-leo-app.vercel.app"
+              target="_blank"
+              rel="noopener"
+              aria-label="Open Snake live"
+              ><span class="ph" aria-hidden="true"
+                ><b>Sn</b
+                ><svg width="38" height="38"><use href="#ast" /></svg></span
+              ><img
+                src="images/snake.png"
+                alt="Snake website screenshot"
+                loading="lazy"
+                onerror="this.remove()"
+              /><span class="no">24</span></a
+            >
+            <div class="body">
+              <div class="cat">Mini Games</div>
+              <h3>Snake</h3>
+              <p>
+                The nostalgic snake game, reimagined — simple controls,
+                addictive difficulty curve.
+              </p>
+              <ul class="chips">
+                <li>JavaScript</li>
+                <li>HTML</li>
+                <li>CSS</li>
+              </ul>
+              <a
+                class="live"
+                href="https://snake-leo-app.vercel.app"
+                target="_blank"
+                rel="noopener"
+                >View live <span aria-hidden="true">&#8599;</span></a
+              >
+            </div>
+          </article>
+          <article class="pcard feat" data-cat="games">
+            <a
+              class="thumb"
+              href="https://ember-run-leo-app.vercel.app"
+              target="_blank"
+              rel="noopener"
+              aria-label="Open Ember Run live"
+              ><span class="ph" aria-hidden="true"
+                ><b>Em</b
+                ><svg width="38" height="38"><use href="#ast" /></svg></span
+              ><img
+                src="images/ember-run.png"
+                alt="Ember Run website screenshot"
+                loading="lazy"
+                onerror="this.remove()"
+              /><span class="no">25</span><span class="fb">Featured</span></a
+            >
+            <div class="body">
+              <div class="cat">Mini Games</div>
+              <h3>Ember Run</h3>
+              <p>
+                A fast-paced browser runner game built to test reflexes and
+                chase high scores.
+              </p>
+              <ul class="chips">
+                <li>JavaScript</li>
+                <li>HTML</li>
+                <li>CSS</li>
+              </ul>
+              <a
+                class="live"
+                href="https://ember-run-leo-app.vercel.app"
+                target="_blank"
+                rel="noopener"
+                >View live <span aria-hidden="true">&#8599;</span></a
+              >
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="clients" id="clients">
+      <div class="label" style="color: var(--paper)">
+        <svg width="18" height="18" aria-hidden="true"><use href="#ast" /></svg
+        >Client profiles
+      </div>
+      <h2>Who we<br /><span class="red">work with.</span></h2>
+
+      <div class="cgrid">
+        <article class="client">
+          <div class="top">
+            <div class="badge">
+              <svg width="30" height="30" aria-hidden="true">
+                <use href="#ast" />
+              </svg>
+            </div>
+            <div>
+              <h3>[Client name]</h3>
+              <div class="ind">[Industry]</div>
+            </div>
+          </div>
+          <dl>
+            <dt>Needed</dt>
+            <dd>[What they came to you for]</dd>
+            <dt>Built</dt>
+            <dd>[What you delivered]</dd>
+            <dt>Stack</dt>
+            <dd>[Tech used]</dd>
+            <dt>Since</dt>
+            <dd>[Year]</dd>
+          </dl>
+        </article>
+        <article class="client">
+          <div class="top">
+            <div class="badge">
+              <svg width="30" height="30" aria-hidden="true">
+                <use href="#ast" />
+              </svg>
+            </div>
+            <div>
+              <h3>[Client name]</h3>
+              <div class="ind">[Industry]</div>
+            </div>
+          </div>
+          <dl>
+            <dt>Needed</dt>
+            <dd>[What they came to you for]</dd>
+            <dt>Built</dt>
+            <dd>[What you delivered]</dd>
+            <dt>Stack</dt>
+            <dd>[Tech used]</dd>
+            <dt>Since</dt>
+            <dd>[Year]</dd>
+          </dl>
+        </article>
+        <article class="client">
+          <div class="top">
+            <div class="badge">
+              <svg width="30" height="30" aria-hidden="true">
+                <use href="#ast" />
+              </svg>
+            </div>
+            <div>
+              <h3>[Client name]</h3>
+              <div class="ind">[Industry]</div>
+            </div>
+          </div>
+          <dl>
+            <dt>Needed</dt>
+            <dd>[What they came to you for]</dd>
+            <dt>Built</dt>
+            <dd>[What you delivered]</dd>
+            <dt>Stack</dt>
+            <dd>[Tech used]</dd>
+            <dt>Since</dt>
+            <dd>[Year]</dd>
+          </dl>
+        </article>
+      </div>
+    </section>
+
+    <section id="voices">
+      <div class="label">
+        <svg width="18" height="18" aria-hidden="true"><use href="#ast" /></svg
+        >Testimonials
+      </div>
+      <h2>In their<br /><span class="out">words.</span></h2>
+
+      <div class="quotes">
+        <figure class="q big">
+          <svg class="mark" aria-hidden="true"><use href="#ast" /></svg>
+          <blockquote>
+            [Add your client's own words here. One or two honest sentences about
+            what changed for them.]
+          </blockquote>
+          <figcaption>
+            <i class="line"></i>[Name] <span>[Role, Company]</span>
+          </figcaption>
+        </figure>
+        <figure class="q">
+          <svg class="mark" aria-hidden="true"><use href="#ast" /></svg>
+          <blockquote>[A shorter quote about working with you.]</blockquote>
+          <figcaption>
+            <i class="line"></i>[Name] <span>[Role, Company]</span>
+          </figcaption>
+        </figure>
+        <figure class="q">
+          <svg class="mark" aria-hidden="true"><use href="#ast" /></svg>
+          <blockquote>[Another short quote about the result.]</blockquote>
+          <figcaption>
+            <i class="line"></i>[Name] <span>[Role, Company]</span>
+          </figcaption>
+        </figure>
+      </div>
+      <p class="note">
+        * Replace bracketed text with real clients and quotes before publishing.
+      </p>
+    </section>
+
+    <section class="manifesto" id="manifesto">
+      <div class="label" style="color: var(--paper)">
+        <svg width="18" height="18" aria-hidden="true"><use href="#ast" /></svg
+        >Manifesto
+      </div>
+      <h2>Made to<br /><span class="red">stand out.</span></h2>
+      <div class="rules">
+        <div class="rule">
+          <b>Match anything</b>
+          <p>Like the wildcard in code, we fit whatever problem you bring.</p>
+        </div>
+        <div class="rule">
+          <b>Bold, not loud</b>
+          <p>Strong design and clean engineering. No filler, no jargon.</p>
+        </div>
+        <div class="rule">
+          <b>Ship it</b>
+          <p>Ideas are cheap. Working software in your hands is the point.</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="process">
+      <div class="label">
+        <svg width="18" height="18" aria-hidden="true"><use href="#ast" /></svg
+        >How it works
+      </div>
+      <h2>Four moves.</h2>
+      <div class="steps">
+        <div class="step">
+          <span class="n">01</span>
+          <h3>Listen</h3>
+          <p>We start with the problem, not the tech stack.</p>
+        </div>
+        <div class="step">
+          <span class="n">02</span>
+          <h3>Design</h3>
+          <p>Architecture and interface shaped together, early.</p>
+        </div>
+        <div class="step">
+          <span class="n">03</span>
+          <h3>Build</h3>
+          <p>Small releases, honest progress, code you can read.</p>
+        </div>
+        <div class="step">
+          <span class="n">04</span>
+          <h3>Ship</h3>
+          <p>Deployed, documented and handed over properly.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="contact" id="contact">
+      <svg class="big-ast" viewBox="-130 -130 260 260" aria-hidden="true">
+        <line x1="0" y1="-120" x2="0" y2="120" />
+        <line x1="-104" y1="-60" x2="104" y2="60" />
+        <line x1="-104" y1="60" x2="104" y2="-60" />
+      </svg>
+      <div style="position: relative">
+        <div class="label">
+          <svg width="18" height="18" aria-hidden="true">
+            <use href="#ast" /></svg
+          >Get in touch
+        </div>
+        <h2>Got an<br />idea?</h2>
+        <a class="btn" href="mailto:itsguruleo@gmail.com"
+          >Let's talk
+          <svg width="30" height="30" aria-hidden="true">
+            <use href="#ast" /></svg
+        ></a>
+      </div>
+      <div class="details">
+        <a href="tel:+917402315648">+91-7402315648</a>
+        <a href="mailto:itsguruleo@gmail.com">itsguruleo@gmail.com</a>
+        <span>Coimbatore, Tamil Nadu, India</span>
+      </div>
+    </section>
+
+    <footer>
+      <span>© 2026 Wildcard</span>
+      <span>Defined by design</span>
+      <span>Made to stand out *</span>
+    </footer>
+  </body>
+</html>
